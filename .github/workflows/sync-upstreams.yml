@@ -1,0 +1,23 @@
+name: Check Upstream Updates
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 02:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-upstreams:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Query upstream latest tags
+        run: |
+          echo "Checking upstream: Silas-02/antigravity-desktop-cn"
+          CN_LATEST=$(curl -s "https://api.github.com/repos/Silas-02/antigravity-desktop-cn/commits/main" | jq -r '.sha' || echo "unknown")
+          echo "Antigravity-desktop-cn latest commit: $CN_LATEST"
+
+          echo "Checking upstream: yuaotian/antigravity-proxy"
+          PROXY_LATEST=$(curl -s "https://api.github.com/repos/yuaotian/antigravity-proxy/releases/latest" | jq -r '.tag_name' || echo "unknown")
+          echo "Antigravity-proxy latest release: $PROXY_LATEST"

@@ -1,0 +1,40 @@
+name: Build Proxy DLL
+
+on:
+  push:
+    paths:
+      - 'modules/proxy/src/**'
+      - 'modules/proxy/include/**'
+      - 'modules/proxy/CMakeLists.txt'
+      - '.github/workflows/build-proxy.yml'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure CMake
+        run: |
+          cmake -B modules/proxy/build -S modules/proxy -DCMAKE_BUILD_TYPE=Release -A x64
+
+      - name: Build version.dll
+        run: |
+          cmake --build modules/proxy/build --config Release --target version
+
+      - name: Verify build output
+        run: |
+          Get-ChildItem -Path modules/proxy/build/bin/Release/version.dll
+
+      - name: Upload compiled binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: antigravity-proxy-x64
+          path: modules/proxy/build/bin/Release/version.dll

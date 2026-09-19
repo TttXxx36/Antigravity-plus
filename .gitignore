@@ -1,0 +1,23 @@
+# Dependencies & build caches
+node_modules/
+_temp_asar/
+.tmp/
+.upstream_cn/
+.upstream_proxy/
+
+# C++ Build artifacts
+modules/proxy/build/
+modules/proxy/.vs/
+modules/proxy/out/
+*.vcxproj*
+*.dir/
+
+# Logs & temp files
+*.log
+*.tmp
+*.bak
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
