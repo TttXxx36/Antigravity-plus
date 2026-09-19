@@ -174,8 +174,16 @@ function deployProxy(installDir) {
 
     try {
         console.log('[代理] 正在部署 version.dll 到 Antigravity 安装目录...');
-        fs.copyFileSync(sourceDll, targetDll);
-        console.log('[代理] version.dll 部署成功！');
+        try {
+            fs.copyFileSync(sourceDll, targetDll);
+            console.log('[代理] version.dll 部署成功！');
+        } catch (copyErr) {
+            if (copyErr.code === 'EBUSY' && fs.existsSync(targetDll)) {
+                console.log('[代理] 检测到 version.dll 当前正被客户端进程加载运行中，保留现有版本。');
+            } else {
+                throw copyErr;
+            }
+        }
 
         if (!fs.existsSync(targetConfig) && fs.existsSync(sourceConfig)) {
             console.log('[代理] 正在部署默认代理配置文件 config.json (默认 SOCKS5 127.0.0.1:7890)...');

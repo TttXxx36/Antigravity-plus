@@ -53,6 +53,8 @@ const MENU_SIGNATURE_START = "'__ANTIGRAVITY_NATIVE_MENU_TRANSLATION_START__';";
 const MENU_SIGNATURE_END = "'__ANTIGRAVITY_NATIVE_MENU_TRANSLATION_END__';";
 const TRAY_SIGNATURE_START = "'__ANTIGRAVITY_TRAY_TRANSLATION_START__';";
 const TRAY_SIGNATURE_END = "'__ANTIGRAVITY_TRAY_TRANSLATION_END__';";
+const QUOTA_SIGNATURE_START = "/* --- ANTIGRAVITY QUOTA BADGE INTEGRATION START --- */";
+const QUOTA_SIGNATURE_END = "/* --- ANTIGRAVITY QUOTA BADGE INTEGRATION END --- */";
 const LEGACY_SIGNATURE_START = ['/', '* --- ANTIGRAVITY CHINESE LOCALIZATION START --- *', '/'].join('');
 const LEGACY_SIGNATURE_END = ['/', '* --- ANTIGRAVITY CHINESE LOCALIZATION END --- *', '/'].join('');
 const LEGACY_MENU_SIGNATURE_START = ['/', '/ =========================================='].join('');
@@ -3114,7 +3116,8 @@ function removeMarkedBlocks(content, startMark, endMark) {
 
 function cleanJsContent(content) {
     const withoutLegacy = removeMarkedBlocks(content, LEGACY_SIGNATURE_START, LEGACY_SIGNATURE_END);
-    return removeMarkedBlocks(withoutLegacy, SIGNATURE_START, SIGNATURE_END);
+    const withoutCn = removeMarkedBlocks(withoutLegacy, SIGNATURE_START, SIGNATURE_END);
+    return removeMarkedBlocks(withoutCn, QUOTA_SIGNATURE_START, QUOTA_SIGNATURE_END);
 }
 
 function cleanMenuJsContent(content) {
@@ -3758,15 +3761,23 @@ function installLocalization(resourcesDir) {
             return false;
         }
 
-    console.log(`[修改] 正在向 preload.js 注入汉化代码...`);
+    console.log(`[修改] 正在向 preload.js 注入汉化代码与模型额度监控引擎...`);
     let content = fs.readFileSync(preloadPath, 'utf-8');
 
     const cleanedContent = cleanJsContent(content);
     const translationJs = generateJs();
-    const newContent = cleanedContent + "\n" + translationJs;
+
+    let quotaBadgeJs = '';
+    const quotaBadgePath = path.resolve(__dirname, '..', 'quota', 'quota_badge.js');
+    if (fs.existsSync(quotaBadgePath)) {
+        quotaBadgeJs = '\n' + fs.readFileSync(quotaBadgePath, 'utf-8');
+        console.log(`[额度] 已载入统一模型默认字体的额度监控模块。`);
+    }
+
+    const newContent = cleanedContent + "\n" + translationJs + quotaBadgeJs;
 
     fs.writeFileSync(preloadPath, newContent, 'utf-8');
-    console.log(`[修改] 注入成功！`);
+    console.log(`[修改] 汉化与额度显示引擎注入成功！`);
 
     const menuPath = path.join(tempDir, "dist", "menu.js");
     if (fs.existsSync(menuPath)) {
