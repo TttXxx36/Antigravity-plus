@@ -16,6 +16,8 @@ modules/proxy/out/
 *.log
 *.tmp
 *.bak
+RELEASE_NOTES.md
+*.zip
 
 # OS specific
 .DS_Store
